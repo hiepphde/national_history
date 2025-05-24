@@ -1,0 +1,27 @@
+{
+  "name": "mongo-connector",
+  "config": {
+    "connector.class": "io.debezium.connector.mongodb.MongoDbConnector",
+    "tasks.max": "1",
+    "topic.prefix": "dbserver1",
+
+    "mongodb.connection.string": "mongodb://debezium:secret123@10.0.15.196:27017/?replicaSet=rs0&authSource=warehouse",
+
+    "database.include.list": "warehouse",
+    "collection.include.list": "warehouse.shipmentOrders",
+
+    "offset.storage.topic": "mongo-offsets",
+    "offset.storage.replication.factor": "1",
+    "offset.storage.partitions": "1",
+
+    "config.storage.topic": "mongo-configs",
+    "status.storage.topic": "mongo-status",
+    "config.storage.replication.factor": "1",
+    "status.storage.replication.factor": "1",
+
+    "key.converter.schemas.enable": "false",
+    "value.converter.schemas.enable": "false",
+    "key.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "value.converter": "org.apache.kafka.connect.json.JsonConverter"
+  }
+}
