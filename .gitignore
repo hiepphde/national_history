@@ -3,6 +3,13 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
+### Plugins ###
+kafka-plugins/
+
+### Certs ###
+elasticsearch-ca.pem
+elasticsearch-truststore.jks
+
 ### IntelliJ IDEA ###
 .idea/modules.xml
 .idea/jarRepositories.xml

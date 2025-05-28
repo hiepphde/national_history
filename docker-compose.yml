@@ -1,29 +1,31 @@
-# Copyright UHT
-
 version: '3.8'
+
+networks:
+  confluent:
+    external: true
 
 services:
   zookeeper:
     image: confluentinc/cp-zookeeper:7.4.0
-    hostname: zookeeper
     container_name: uht-zookeeper
+    hostname: zookeeper
     ports:
       - "2181:2181"
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
     healthcheck:
-      test: echo srvr | nc zookeeper 2181 || exit 1
+      test: echo srvr | nc -w 5 zookeeper 2181 || exit 1
       start_period: 10s
       retries: 20
       interval: 10s
     networks:
-      confluent:
+      - confluent
 
-  broker:
+  kafka:
     image: confluentinc/cp-kafka:7.4.0
-    hostname: broker
-    container_name: uht-broker
+    container_name: uht-kafka
+    hostname: kafka
     depends_on:
       zookeeper:
         condition: service_healthy
@@ -35,7 +37,7 @@ services:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
@@ -44,55 +46,52 @@ services:
       KAFKA_JMX_PORT: 9101
       KAFKA_JMX_HOSTNAME: localhost
     healthcheck:
-      test: nc -z localhost 9092 || exit -1
+      test: nc -z localhost 9092 || exit 1
       start_period: 15s
       interval: 5s
       timeout: 10s
       retries: 10
     networks:
-      confluent:
+      - confluent
 
   control-center:
     image: confluentinc/cp-enterprise-control-center:7.4.0
-    hostname: control-center
     container_name: uht-control-center
+    hostname: control-center
     depends_on:
-      broker:
+      kafka:
         condition: service_healthy
     ports:
       - "9021:9021"
     environment:
-      CONTROL_CENTER_BOOTSTRAP_SERVERS: 'broker:29092'
+      CONTROL_CENTER_BOOTSTRAP_SERVERS: 'kafka:29092'
       CONTROL_CENTER_REPLICATION_FACTOR: 1
       CONTROL_CENTER_INTERNAL_TOPICS_PARTITIONS: 1
       CONTROL_CENTER_MONITORING_INTERCEPTOR_TOPIC_PARTITIONS: 1
       CONFLUENT_METRICS_TOPIC_REPLICATION: 1
       CONFLUENT_METRICS_ENABLE: 'false'
       PORT: 9021
-    networks:
-      confluent:
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9021/health"]
       interval: 30s
       timeout: 10s
       retries: 5
+    networks:
+      - confluent
 
   debezium:
-#    build:
-#      context: ./Dockerfile
-#      dockerfile: Dockerfile
     image: debezium/connect:2.5
     container_name: uht-debezium
     hostname: debezium
     depends_on:
-      broker:
+      kafka:
         condition: service_healthy
     ports:
       - '8093:8083'
     environment:
-      BOOTSTRAP_SERVERS: broker:29092
+      BOOTSTRAP_SERVERS: kafka:29092
       CONNECT_REST_ADVERTISED_HOST_NAME: debezium
-      GROUP_ID: 1
+      GROUP_ID: connect-cluster
       CONFIG_STORAGE_TOPIC: connect_configs
       STATUS_STORAGE_TOPIC: connect_statuses
       OFFSET_STORAGE_TOPIC: connect_offsets
@@ -102,16 +101,24 @@ services:
       CONNECT_VALUE_CONVERTER_SCHEMAS_ENABLE: 'false'
       ENABLE_DEBEZIUM_SCRIPTING: 'true'
       INCLUDE_SCHEMA_CHANGES: 'true'
-
+      CONNECT_PLUGIN_PATH: /docker-plugins,/kafka/connect
+      JAVA_TOOL_OPTIONS: >
+        -Djavax.net.ssl.trustStore=/etc/kafka/secrets/elasticsearch-truststore.jks
+        -Djavax.net.ssl.trustStorePassword=changeit
+    volumes:
+      - ./kafka-plugins:/docker-plugins
+      - ./elasticsearch-sink.json:/opt/elasticsearch-sink.json:ro
+      - ./elasticsearch-ca.pem:/etc/pki/ca-trust/extracted/java/elasticsearch-ca.pem:ro
+      - ./elasticsearch-truststore.jks:/etc/kafka/secrets/elasticsearch-truststore.jks:ro
+    # Use default entrypoint to start Connect
     healthcheck:
-      test:
-        [ 'CMD', 'curl', '--silent', '--fail', '-X', 'GET', 'http://localhost:8083/connectors', ]
+      test: ['CMD', 'curl', '--silent', '--fail', '-X', 'GET', 'http://localhost:8083/connectors']
       start_period: 10s
       interval: 10s
       timeout: 5s
       retries: 5
     networks:
-      confluent:
+      - confluent
 
   debezium-ui:
     image: debezium/debezium-ui:latest
@@ -125,9 +132,4 @@ services:
     environment:
       KAFKA_CONNECT_URIS: http://debezium:8083
     networks:
-      confluent:
-
-networks:
-  confluent:
-    name: confluent
-    driver: bridge
+      - confluent
