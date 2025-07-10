@@ -1,0 +1,23 @@
+{
+  "name": "uht-postgres-connector",
+  "config": {
+    "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+    "topic.prefix": "uht",
+    "database.hostname": "10.0.15.196",
+    "database.port": "5432",
+    "database.user": "dba_user",
+    "database.password": "NWiVBG6Oo0G0TE981sR7L2EG",
+    "database.dbname": "national_administration",
+    "database.server.name": "postgres",
+    "slot.name": "national_administration_slot",
+    "plugin.name": "pgoutput",
+    "schema.include.list": "public",
+    "decimal.handling.mode": "string",
+    "time.precision.mode": "connect",
+    "time.format": "yyyy-MM-dd HH:mm:ss.SSSSSS",
+    "timestamp.format": "yyyy-MM-dd HH:mm:ss.SSSSSS",
+    "database.history.kafka.bootstrap.servers": "PLAINTEXT://localhost:9092",
+    "database.history.kafka.topic": "dbhistory.national_administration",
+    "publication.name": "dbz_publication"
+  }
+}
