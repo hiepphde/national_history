@@ -7,8 +7,8 @@ target/
 kafka-plugins/
 
 ### Certs ###
-elasticsearch-ca.pem
-elasticsearch-truststore.jks
+certs/elasticsearch-ca.pem
+certs/elasticsearch-truststore.jks
 
 ### IntelliJ IDEA ###
 .idea/modules.xml

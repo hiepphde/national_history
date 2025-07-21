@@ -100,8 +100,8 @@ services:
         -Djavax.net.ssl.trustStorePassword=changeit
     volumes:
       - ./kafka-plugins:/docker-plugins
-      - ./elasticsearch-ca.pem:/etc/pki/ca-trust/extracted/java/elasticsearch-ca.pem:ro
-      - ./elasticsearch-truststore.jks:/etc/kafka/secrets/elasticsearch-truststore.jks:ro
+      - ./certs/elasticsearch-ca.pem:/etc/pki/ca-trust/extracted/java/elasticsearch-ca.pem:ro
+      - ./certs/elasticsearch-truststore.jks:/etc/kafka/secrets/elasticsearch-truststore.jks:ro
     # Use default entrypoint to start Connect
     healthcheck:
       test: ['CMD', 'curl', '--silent', '--fail', '-X', 'GET', 'http://localhost:8083/connectors']

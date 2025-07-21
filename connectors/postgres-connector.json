@@ -18,6 +18,7 @@
     "timestamp.format": "yyyy-MM-dd HH:mm:ss.SSSSSS",
     "database.history.kafka.bootstrap.servers": "PLAINTEXT://localhost:9092",
     "database.history.kafka.topic": "dbhistory.national_administration",
-    "publication.name": "dbz_publication"
+    "publication.name": "dbz_publication",
+    "snapshot.mode": "initial"
   }
 }
