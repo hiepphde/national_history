@@ -15,9 +15,6 @@ Already a pro? Just edit this README.md and make it your own. Want to make it ea
 
 ```
 cd existing_repo
-git remote add origin http://maingit.trungtamduocpham.com/ptgp/job-warehouse-pipeline.git
-git branch -M master
-git push -uf origin master
 ```
 
 ## Integrate with your tools
