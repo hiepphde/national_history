@@ -1,9 +1,10 @@
 package model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
-
 import java.sql.Timestamp;
 
+@Data
 public class Ward {
     private Before before;
     private After after;
@@ -13,7 +14,8 @@ public class Ward {
     private String transaction;
 
     @Data
-    private static class Before {
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class Before {
         private String id;
         private String ward;
         private String code;
@@ -25,7 +27,8 @@ public class Ward {
     }
 
     @Data
-    private static class After {
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class After {
         private String id;
         private String ward;
         private String code;
@@ -37,7 +40,8 @@ public class Ward {
     }
 
     @Data
-    private static class Source {
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class Source {
         private String version;
         private String connector;
         private String name;

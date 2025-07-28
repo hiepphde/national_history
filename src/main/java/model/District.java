@@ -6,6 +6,7 @@ import lombok.Data;
 import java.sql.Timestamp;
 
 @Data
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class District {
     private Before before;
     private After after;

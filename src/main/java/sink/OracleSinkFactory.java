@@ -32,7 +32,7 @@ public class OracleSinkFactory {
                             }
                         },
                         JdbcExecutionOptions.builder()
-                                .withBatchSize(1)
+                                .withBatchSize(100)
                                 .withBatchIntervalMs(100)
                                 .withMaxRetries(3)
                                 .build(),
